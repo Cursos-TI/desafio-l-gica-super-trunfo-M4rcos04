@@ -1,43 +1,102 @@
 #include <stdio.h>
+#include <stdbool.h>
 
-// Desafio Super Trunfo - Países
-// Tema 2 - Comparação das Cartas
-// Este código inicial serve como base para o desenvolvimento do sistema de comparação de cartas de cidades. 
-// Siga os comentários para implementar cada parte do desafio.
+#define ROWS 10
+#define COLS 10
+#define SHIP_SIZE 3
+#define WATER 0
+#define SHIP 3
 
-int main() {
-    // Definição das variáveis para armazenar as propriedades das cidades
-    // Você pode utilizar o código do primeiro desafio
+typedef enum { HORIZONTAL, VERTICAL } Orientation;
 
-    
-    // Cadastro das Cartas:
-    // Implemente a lógica para solicitar ao usuário que insira os dados das cidades
-    // utilizando a função scanf para capturar as entradas.
-    // utilize o código do primeiro desafio
+/* Inicializa o tabuleiro com água (0) */
+void initBoard(int board[ROWS][COLS]) {
+    int r, c;
+    for (r = 0; r < ROWS; r++) {
+        for (c = 0; c < COLS; c++) {
+            board[r][c] = WATER;
+        }
+    }
+}
 
-    // Exemplo:
-    // printf("Digite o código da cidade: ");
-    // scanf("%s", codigo);
-    // 
-    // (Repita para cada propriedade)
+/* Imprime o tabuleiro */
+void printBoard(int board[ROWS][COLS]) {
+    int r, c;
+    printf("   ");
+    for (c = 0; c < COLS; c++) {
+        printf("%2d ", c);
+    }
+    printf("\n");
+    for (r = 0; r < ROWS; r++) {
+        printf("%2d ", r);
+        for (c = 0; c < COLS; c++) {
+            printf("%2d ", board[r][c]);
+        }
+        printf("\n");
+    }
+}
 
-    // Comparação de Cartas:
-    // Desenvolva a lógica de comparação entre duas cartas.
-    // Utilize estruturas de decisão como if, if-else para comparar atributos como população, área, PIB, etc.
+/* Verifica se é possível posicionar o navio */
+bool canPlaceShip(int board[ROWS][COLS], int startRow, int startCol, Orientation o) {
+    int i;
+    if (o == HORIZONTAL) {
+        if (startCol < 0 || startCol + SHIP_SIZE - 1 >= COLS || startRow < 0 || startRow >= ROWS)
+            return false;
+        for (i = 0; i < SHIP_SIZE; i++) {
+            if (board[startRow][startCol + i] != WATER) return false;
+        }
+    } else { // vertical
+        if (startRow < 0 || startRow + SHIP_SIZE - 1 >= ROWS || startCol < 0 || startCol >= COLS)
+            return false;
+        for (i = 0; i < SHIP_SIZE; i++) {
+            if (board[startRow + i][startCol] != WATER) return false;
+        }
+    }
+    return true;
+}
 
-    // Exemplo:
-    // if (populacaoA > populacaoB) {
-    //     printf("Cidade 1 tem maior população.\n");
-    // } else {
-    //     printf("Cidade 2 tem maior população.\n");
-    // }
+/* Posiciona o navio no tabuleiro */
+bool placeShip(int board[ROWS][COLS], const int shipVec[SHIP_SIZE],
+               int startRow, int startCol, Orientation o) {
+    int i;
+    if (!canPlaceShip(board, startRow, startCol, o)) return false;
 
-    // Exibição dos Resultados:
-    // Após realizar as comparações, exiba os resultados para o usuário.
-    // Certifique-se de que o sistema mostre claramente qual carta venceu e com base em qual atributo.
+    if (o == HORIZONTAL) {
+        for (i = 0; i < SHIP_SIZE; i++) {
+            board[startRow][startCol + i] = shipVec[i];
+        }
+    } else {
+        for (i = 0; i < SHIP_SIZE; i++) {
+            board[startRow + i][startCol] = shipVec[i];
+        }
+    }
+    return true;
+}
 
-    // Exemplo:
-    // printf("A cidade vencedora é: %s\n", cidadeVencedora);
+/* Programa principal */
+int main(void) {
+    int board[ROWS][COLS];
+    int shipHorizontal[SHIP_SIZE] = { SHIP, SHIP, SHIP };
+    int shipVertical[SHIP_SIZE]   = { SHIP, SHIP, SHIP };
 
+    int hRow = 2, hCol = 4; // início do navio horizontal
+    int vRow = 6, vCol = 1; // início do navio vertical
+
+    initBoard(board);
+
+    if (!placeShip(board, shipHorizontal, hRow, hCol, HORIZONTAL)) {
+        printf("Erro: nao foi possivel posicionar o navio horizontal.\n");
+        return 1;
+    }
+
+    if (!placeShip(board, shipVertical, vRow, vCol, VERTICAL)) {
+        printf("Erro: nao foi possivel posicionar o navio vertical.\n");
+        return 1;
+    }
+
+    printBoard(board);
+
+    printf("\nPressione ENTER para sair...");
+    getchar(); // mantém a janela aberta até apertar ENTER
     return 0;
 }
